@@ -11,17 +11,26 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
+    
     if (token && userId) {
       setIsAuthenticated(true);
-      setUser({ userId });
+      setUser({
+        userId,
+        role: userRole || 'student' // Default role
+      });
     }
   }, []);
 
   const login = (userData) => {
     setIsAuthenticated(true);
-    setUser(userData);
+    setUser({
+      userId: userData.userId,
+      role: userData.role || 'student'
+    });
     localStorage.setItem('token', userData.token);
     localStorage.setItem('userId', userData.userId);
+    localStorage.setItem('userRole', userData.role || 'student');
   };
 
   const logout = () => {
@@ -29,11 +38,22 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
     navigate('/login');
   };
 
+  const hasPermission = (requiredRole) => {
+    const roleHierarchy = {
+      admin: 3,
+      teacher: 2,
+      student: 1
+    };
+
+    return user && roleHierarchy[user.role] >= roleHierarchy[requiredRole];
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );

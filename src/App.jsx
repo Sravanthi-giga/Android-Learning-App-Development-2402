@@ -4,6 +4,7 @@ import { QuestProvider } from '@questlabs/react-sdk';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 import Navigation from './components/Navigation';
+import RoleBasedRoute from './components/RoleBasedRoute';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Home from './pages/Home';
@@ -12,14 +13,10 @@ import Progress from './pages/Progress';
 import Profile from './pages/Profile';
 import SubjectDetail from './pages/SubjectDetail';
 import Quiz from './pages/Quiz';
+import Unauthorized from './pages/Unauthorized';
 import questConfig from './config/questConfig';
 import '@questlabs/react-sdk/dist/style.css';
 import './App.css';
-
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" />;
-};
 
 function AppContent() {
   const { isAuthenticated } = useAuth();
@@ -27,14 +24,70 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Routes>
-        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
-        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-        <Route path="/subjects" element={<ProtectedRoute><Subjects /></ProtectedRoute>} />
-        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/subject/:id" element={<ProtectedRoute><SubjectDetail /></ProtectedRoute>} />
-        <Route path="/quiz/:subject" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
+        <Route 
+          path="/login" 
+          element={!isAuthenticated ? <Login /> : <Navigate to="/" />} 
+        />
+        <Route 
+          path="/unauthorized" 
+          element={<Unauthorized />} 
+        />
+        <Route
+          path="/onboarding"
+          element={
+            <RoleBasedRoute requiredRole="student">
+              <Onboarding />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <RoleBasedRoute requiredRole="student">
+              <Home />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/subjects"
+          element={
+            <RoleBasedRoute requiredRole="student">
+              <Subjects />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/progress"
+          element={
+            <RoleBasedRoute requiredRole="student">
+              <Progress />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <RoleBasedRoute requiredRole="student">
+              <Profile />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/subject/:id"
+          element={
+            <RoleBasedRoute requiredRole="student">
+              <SubjectDetail />
+            </RoleBasedRoute>
+          }
+        />
+        <Route
+          path="/quiz/:subject"
+          element={
+            <RoleBasedRoute requiredRole="student">
+              <Quiz />
+            </RoleBasedRoute>
+          }
+        />
       </Routes>
       {isAuthenticated && <Navigation />}
     </div>
